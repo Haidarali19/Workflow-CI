@@ -1,0 +1,12 @@
+name: house_price_env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12.7
+  - pip
+  - pip:
+      - mlflow==2.19.0
+      - dagshub
+      - pandas
+      - scikit-learn
+      - matplotlib
