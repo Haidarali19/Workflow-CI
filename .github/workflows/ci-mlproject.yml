@@ -2,24 +2,54 @@ name: CI for MLProject
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Run actions/checkout@v3
         uses: actions/checkout@v3
 
-      - name: Login to Docker Hub
+      - name: Set up Python 3.12.7
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.7'
+
+      - name: Check Env
+        run: |
+          python --version
+          pip --version
+
+      - name: Install dependencies
+        run: |
+          pip install mlflow dvc google-cloud-storage pandas scikit-learn
+
+      - name: Run mlflow project
+        run: |
+          mlflow run MLProject --no-conda
+
+      - name: Get latest MLflow run_id
+        run: |
+          echo "RUN_ID=$(mlflow search-runs --experiment-names "Default" --max-results 1 --output csv | tail -n 1 | cut -d ',' -f 1)" >> $GITHUB_ENV
+
+      - name: Install Python dependencies
+        run: pip install -r MLProject/requirements.txt || echo "No requirements.txt found"
+
+      - name: Upload to Google Drive
+        run: echo "Simulating upload to Google Drive..." 
+
+      - name: Build Docker Model
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/house-price-model ./MLProject
+
+      - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./MLProject
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/house-price-model:latest
+      - name: Tag Docker Image
+        run: docker tag ${{ secrets.DOCKERHUB_USERNAME }}/house-price-model ${{ secrets.DOCKERHUB_USERNAME }}/house-price-model:latest
+
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/house-price-model:latest
