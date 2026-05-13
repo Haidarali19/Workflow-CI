@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install mlflow dvc google-cloud-storage pandas scikit-learn
+          pip install mlflow dvc google-cloud-storage pandas scikit-learn dagshub matplotlib
 
       - name: Run mlflow project
         run: |
