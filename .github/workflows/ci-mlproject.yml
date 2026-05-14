@@ -25,12 +25,11 @@ jobs:
         run: |
           pip install mlflow dvc google-cloud-storage pandas scikit-learn dagshub matplotlib
 
-      - name: Run modelling script
+      - name: Run mlflow project
         env:
           DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
-          cd MLProject
-          python modelling.py
+          mlflow run MLProject --env-manager=local
 
       - name: Get latest MLflow run_id
         run: |
