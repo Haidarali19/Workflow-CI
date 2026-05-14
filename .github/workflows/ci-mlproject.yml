@@ -26,6 +26,8 @@ jobs:
           pip install mlflow dvc google-cloud-storage pandas scikit-learn dagshub matplotlib
 
       - name: Run mlflow project
+        env:
+          DAGSHUB_USER_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         run: |
           mlflow run MLProject --env-manager=local
 
